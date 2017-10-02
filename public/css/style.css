@@ -1,0 +1,95 @@
+
+#title {
+    text-align:center;
+}
+
+#content {
+    margin: 0 auto;
+    max-width: 1300px;
+}
+
+#ttt {
+    border-color: darkslategrey;
+    border-style: solid;
+    border-width: 2px;
+    padding: 2px;
+}
+
+#game_main {
+    display: inline-block;
+    width: 500px;
+    text-align: center;
+    padding-left: 13%;
+    padding-top: 10px;
+    vertical-align: top;
+}
+
+#game_message {
+    margin-bottom:6px;
+}
+
+#game_status {
+    color: seagreen;
+    margin-top: 6px;
+    margin-bottom:20px;
+}
+
+
+#superchat_main {
+    width: 600px;
+    display: inline-block;
+}
+
+#chat_container {
+    float: left;
+    width: 55%;
+    position: relative;
+    border-color: black;
+    border-style: groove;
+    border-width: 1px;
+    padding: 7px;
+    height: 450px;
+    overflow:auto;
+}
+
+#chat_window strong {
+    /*color: white;*/
+    padding: 2px;
+}
+
+#chat_message {
+    width: 75%;
+}
+
+#chat_users {
+    float: left;
+    width: 25%;
+    font-size: 14px;
+    background-color: aliceblue;
+    border-color: black;
+    border-style: groove;
+    border-width: 1px;
+    padding: 6px;
+    height: 400px;
+}
+
+#login_page {
+    visibility: hidden;
+    width: 260px;
+    position: absolute;
+    top: 15px;
+    z-index: 100;
+    background: aliceblue;
+    height: 420px;
+    margin-left: 20px;
+    border-color: darkgray;
+    border-style: solid;
+    border-radius: 2px;
+    border-width: 1px;
+}
+
+#login_form {
+    position: relative;
+    text-align: center;
+    top: 40%;
+}
