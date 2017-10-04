@@ -123,7 +123,7 @@ function play(cell) {
     msgDisplayTurn();
 }
 
-function showWin(winCheck) {
+function showWin(winCheck, winningTurn) {
     let bit = 1;
     for (let i = map.length - 1; i >= 0; i--) {
 
@@ -133,7 +133,7 @@ function showWin(winCheck) {
         bit <<= 1;
     }    
 
-    msg.textContent = ((currentTurn * -1 === X) ? 'X' : 'O') + " wins!"; //whoever made the last turn wins
+    msg.textContent = ((winningTurn === X) ? 'X' : 'O') + " wins!";
 }
 
 
@@ -387,7 +387,7 @@ socket.on('update board', function (data) {
     fillBoard();
 
     if (data.winCheck > 0) {
-        showWin(data.winCheck);
+        showWin(data.winCheck, data.currentTurn * -1);
         gameOver = true;
     }
 });
@@ -399,11 +399,16 @@ socket.on('player has joined', function (data) {
     fillBoard();
     msg.textContent = data.msg;
     currentTurn = data.currentTurn;
-    this.gameFull = data.gameFull;
+    gameFull = data.gameFull;
 
-    if (this.gameFull) {
+    if (gameFull) {
         isActivePlayer = false;
-        textStatus.textContent = "Observation Mode";
+        textStatus.textContent = "Spectator Mode";
+
+        if ((gameOver = data.gameOver) === true) {
+            showWin(data.winningPattern, data.currentTurn * -1);
+        }
+
         return;
     }
 
@@ -423,7 +428,8 @@ socket.on('player has joined', function (data) {
 socket.on('you have won', function (data) {
 
     if (data.winCheck !== 0) {
-        showWin(data.winCheck);
+        showWin(data.winCheck, data.winningTurn);
+        
         gameOver = true;
     } 
 });

@@ -5,10 +5,6 @@ Possible new features:
 -Try adding buttons to the page to make pre-loaded sounds play at a distance. A little "ding" to wake up sleeping clients?
 -Try to save the messages in the memory on the server so that the list of the latest messages can be displayed when we connect. You can save information in the memory as we learnt try to couple Node.js with a MySQL, MongoDB, redis, etc. database.
 
-
--update win message for X
--show win pattern for observers
-
 */
 
 var express = require('express'),
@@ -33,6 +29,7 @@ Needs to: display past winners -> X or O, and their username
 
 */
 var scoreBoard = [];
+var winningPattern = [];
 var winPatterns = [
     0b111000000, 0b000111000, 0b000000111, // Rows
     0b100100100, 0b010010010, 0b001001001, // Columns
@@ -119,7 +116,9 @@ io.sockets.on('connection', function (socket, username) {
             currentTurn: currentTurn,
             map: currentMap,
             gameFull: gameFull,
-            msg: msg
+            msg: msg,
+            gameOver: gameOver,
+            winningPattern: winningPattern
         });
     });
 
@@ -131,10 +130,13 @@ io.sockets.on('connection', function (socket, username) {
 
         if (winCheck > 0) {
             socket.emit('you have won', {
-                winCheck: winCheck
+                winCheck: winCheck,
+                winningTurn: data.currentPlayer
             });
 
             scoreBoard.push({ player: (data.currentPlayer === X ? 'X' : 'O'), sessionId: socket.id });
+            gameOver = true;
+            winningPattern = winCheck;
             //console.log(scoreBoard);
         }
 
@@ -184,14 +186,12 @@ io.sockets.on('connection', function (socket, username) {
             }
         }
 
-
         if (typeof socket.username === "undefined" || socket.username.trim() === "") {
             return;
         }
 
         --numUsers;
         removeFromArray(usersArray, socket.username);
-
 
         // echo globally that this client has left
         socket.broadcast.emit('client left', {
