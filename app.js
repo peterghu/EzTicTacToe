@@ -14,13 +14,19 @@ var express = require('express'),
     ent = require('ent'), // Blocks HTML characters (security equivalent to htmlentities in PHP)
     fs = require('fs');
 
+/* Constants */
+let PLAYER_BLANK = 0, PLAYER_X = 1, PLAYER_O = -1,
+    SINGLE_PLAYER = 1, TWO_PLAYER = 2, AWAITING_MODE = 0,
+    OUTCOME_UNDECIDED = 4, OUTCOME_TIE = 5, OUTCOME_X = 6, OUTCOME_O = 7;
+
 /* Game variables */
 var usersArray = [],
     numUsers = 0, //track the number of users connected
     activePlayers = [],
-    currentTurn = 1,
+    currentTurn = PLAYER_X,
     currentMap = [],
-    gameOver = false;
+    gameOver = false,
+    gameResult = OUTCOME_UNDECIDED;
 
 
 /*
@@ -36,8 +42,6 @@ var winPatterns = [
     0b100010001, 0b001010100 //Diagonals
 ];
 
-/* Constants */
-var X = 1, O = -1, BLANK = 0;
 
 /* Function declarations */
 function removeFromArray(arr, target) {
@@ -52,6 +56,7 @@ function removeFromArray(arr, target) {
 
 function checkWin(player) {
     let playerMapBitMask = 0;
+    //console.log(currentMap);
 
     for (let i = 0, len = currentMap.length; i < len; i++) {
         playerMapBitMask <<= 1;
@@ -67,6 +72,18 @@ function checkWin(player) {
     }
 
     return 0;
+}
+
+function getCurrentTime() {
+    var currentdate = new Date();
+    var datetime = currentdate.getDate() + "/"
+        + (currentdate.getMonth() + 1) + "/"
+        + currentdate.getFullYear() + " @ "
+        + currentdate.getHours() + ":"
+        + currentdate.getMinutes() + ":"
+        + currentdate.getSeconds();
+
+    return datetime;
 }
 
 
@@ -89,7 +106,6 @@ io.sockets.on('connection', function (socket, username) {
 
     // When a new player has joined
     socket.on('player has joined', function (data) {
-        //console.log("Player has joined: " + data.currentPlayer + "with map: " + data.map);
         var msg = "",
             currentPlayer = 0,
             sessionId = socket.id,
@@ -100,12 +116,12 @@ io.sockets.on('connection', function (socket, username) {
             gameFull = true;
         }
         else if (activePlayers.length < 1) {
-            currentPlayer = X; //first player is always X
+            currentPlayer = PLAYER_X; //first player is always X
             msg = "Player X has joined";
             currentMap = data.map; //save X's first turn
             activePlayers.push({ currentPlayer, sessionId });
         } else {
-            currentPlayer = O;
+            currentPlayer = PLAYER_O;
             msg = "Player O has joined";
             activePlayers.push({ currentPlayer, sessionId });
         }
@@ -118,34 +134,64 @@ io.sockets.on('connection', function (socket, username) {
             gameFull: gameFull,
             msg: msg,
             gameOver: gameOver,
-            winningPattern: winningPattern
+            winningPattern: winningPattern,
+            scoreBoard: scoreBoard,
+            gameResult: gameResult
         });
     });
 
     socket.on('player made a move', function (data) {
         currentTurn = data.currentPlayer * -1;
         currentMap = data.map;
-
+        var msg = "";
         var winCheck = checkWin(data.currentPlayer);
 
         if (winCheck > 0) {
-            socket.emit('you have won', {
-                winCheck: winCheck,
-                winningTurn: data.currentPlayer
-            });
-
-            scoreBoard.push({ player: (data.currentPlayer === X ? 'X' : 'O'), sessionId: socket.id });
+            scoreBoard.push({ player: (data.currentPlayer === PLAYER_X ? 'X' : 'O'), sessionId: socket.id, playedOn: getCurrentTime() });
             gameOver = true;
             winningPattern = winCheck;
-            //console.log(scoreBoard);
+            data.currentPlayer === PLAYER_X ? gameResult = OUTCOME_X : gameResult = OUTCOME_O;
+
+            socket.emit('you have won', {
+                winCheck: winCheck,
+                winningTurn: data.currentPlayer,
+                scoreBoard: scoreBoard,
+                gameResult: gameResult
+            });
+
         }
+
+        if (currentMap.indexOf(PLAYER_BLANK) === -1 && !gameOver) {
+            gameOver = true;
+            msg = "Tie!";
+            gameResult = OUTCOME_TIE;
+        }
+
 
         socket.broadcast.emit('update board', {
             currentPlayer: data.currentPlayer,
             map: currentMap,
             currentTurn: currentTurn,
-            winCheck: winCheck
+            winCheck: winCheck,
+            scoreBoard: scoreBoard,
+            msg: msg,
+            gameResult: gameResult
         });
+    });
+
+    socket.on("player requests reset", function (data) {
+        //if active players have left and a spectator wants to reset
+
+        //if an active player requests reset
+        currentTurn = PLAYER_X;
+        currentMap = [];
+        gameOver = false;
+        gameResult = OUTCOME_UNDECIDED;
+       
+        socket.broadcast.emit('reset board', {
+
+        });
+
     });
 
     // When the username is received. it's stored as a session variable and informs the other people

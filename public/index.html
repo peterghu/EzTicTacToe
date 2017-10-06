@@ -11,15 +11,15 @@
 
     <div id="content">
         <div id="game_main">
-            <canvas id="ttt"></canvas>
+            <canvas id="game_canvas"></canvas>
             <p id="game_message">Welcome to EzTicTacToe!</p>
             <p id="game_status"><b>Awaiting new players... </b></p>
-            <button id="ttt_start" disabled="disabled">Start game</button>
-            <button id="ttt_clear">Clear board</button>
+            <button id="game_start" disabled="disabled">Start game</button>
+            <button id="game_clear">Clear board</button>
         </div>
 
 
-        <div id="superchat_main">
+        <div id="chat_main">
             <div id="chat_container">
                 <form action="/" method="post" id="chat_form">
                     <input type="text" name="message" id="chat_message" placeholder="Your message..." size="50" autofocus />
@@ -44,6 +44,10 @@
         </div>
     </div>
     <br>
+    <div id="scoreboard_container">
+        <p><strong>Our latest winners are:</strong></p>
+        <section id="scoreboard">..........</section>
+    </div>
 
     <span id="chat_debug"></span>
 
