@@ -1,6 +1,6 @@
 {
-    "name": "todolist",
-    "version": "0.1.0",
+    "name": "EzTicTacToe",
+    "version": "0.5.0",
     "dependencies": {
         "express": "~4.11.0",
         "ejs": "~2.1.4",
@@ -10,5 +10,5 @@
         "ent": "~2.2.0"
     },
     "author": "Peter H <peterh782@gmail.com>",
-    "description": "Very basic chat app"
+    "description": "Multiplayer Tic-Tac-Toe implementation with basic chat functionality"
 }
